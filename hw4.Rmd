@@ -1,0 +1,303 @@
+---
+title: "HW4"
+author: "Yuyu"
+date: "2019.11.11"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+## Question 1
+## Ch.4  problem 1
+```{r }
+paint_suppliers=c(69,59,55,70,
+                  83,65,65,75,
+                  74,64,59,74,
+                  61,52,59,62,
+                  78,71,67,74,
+                  69,64,58,74)
+fnames<- list(suppliers =c("GS", "FD","L","ZK"),
+              sites = c(1:6))
+paint.design<- fac.design(c(4,6),nfactors=NULL,fnames,randomize=F)
+paint.df=data.frame(paint.design,paint_suppliers)
+head(paint.df)
+mean(paint.df$paint_suppliers)
+```
+(a) 
+The order of the treatments within blocks was chosen at random
+so it's a randomized blocks experiment
+(b)
+Hypothesis 1: there is no significant difference of block effects
+Hypothesis 2: there is no significant difference of treatment effects
+```{r }
+## graphical analysis
+attach(paint.df)
+interaction.plot(suppliers,sites,paint_suppliers)
+## anova
+
+fit1 <- aov(paint_suppliers~sites+suppliers, data = paint.df)
+summary(fit1)
+```
+(c)confidence limits for supplier averages
+```{r}
+
+sprintf("GS-95 percent confidence interval is %f -%f",t.test(paint_suppliers[suppliers=='GS'])$conf.int[1],t.test(paint_suppliers[suppliers=='GS'])$conf.int[2])
+sprintf("FD-95 percent confidence interval is %f -%f",t.test(paint_suppliers[suppliers=='FD'])$conf.int[1],t.test(paint_suppliers[suppliers=='FD'])$conf.int[2])
+sprintf("L-95 percent confidence interval is %f -%f",t.test(paint_suppliers[suppliers=='L'])$conf.int[1],t.test(paint_suppliers[suppliers=='L'])$conf.int[2])
+sprintf("ZK-95 percent confidence interval is %f -%f",t.test(paint_suppliers[suppliers=='ZK'])$conf.int[1],t.test(paint_suppliers[suppliers=='ZK'])$conf.int[2])
+
+```
+Above is the confidence limits for supplier averages at 95% confidence level 
+(d)make a check of departures from assumptions
+```{r}
+plot(fit1)
+
+```
+
+All residuals are nicely fitted and randomly scatterd. There is no obvious pattern in the residual plot.
+The QQ plot looks all lined up and no significant deviations.
+So I believe my model is a good fit.
+
+(e)data contain bad values?
+```{r}
+
+boxplot(paint_suppliers~suppliers,data =paint.df )
+
+```
+All the data looks nice except there is one outlier under ZK treatment
+
+(f)relative resistance to wear of four paints?
+```{r}
+library(multcomp)
+lm2=glht(fit1,linfct=mcp(suppliers="Tukey"))
+summary(lm2)
+
+```
+Four pairs:GS&FD, L&GS, ZK&FD and ZK&L are significantly different.
+ (1) It depends on the suppliers.Paints from GS are most durable, and then Zk, L and FD. Paints from supplier FD have the poorest resistance.
+ (2) It also varies a lot in different sites due to differenct levels of traffic and weather.
+
+(g) was this experienmental design helpful?
+  It's helpful. But still needs improvements.
+  We seek to elimated the block effects of the experienment design, but there existed sites influence on our experienment result.
+
+## Ch.4  problem 3
+
+```{r pressure, echo=FALSE}
+weight_changes<- c(15,10,8,
+            24,15,17,
+            31,28,34,
+            37,36,34,
+            33,37,39)
+fnames<- list( regimes = c("A","B","C") ,
+               Groups =c(1:5))
+weight.design<- fac.design(c(3,5),nfactors=NULL,fnames,randomize=F)
+weight.df <- data.frame(weight.design,weight_changes)
+head(weight.df)
+
+```
+
+(a)make analyis including a graphical analysis
+```{r}
+## graphical analysis
+attach(weight.df)
+interaction.plot(regimes,Groups,weight_changes,col =1:5)
+## anova
+fit2=aov(weight_changes~regimes+Groups,data=weight.df)
+summary(fit2)
+
+```
+Conclusion:
+  1. Different groups have a sunstantical different weight loss.
+     The difference of weight between different regimes is not significant 
+  2. Overall, group5 have the most weightloss and then following group4, group 3, group2 and group1.
+  
+(b)How might average weight influence your analysis?
+`
+```{r}
+weight2.df=aggregate(weight_changes~Groups,weight.df,mean)
+weight2.df["beforeweight"]=c(250,309,327,356,379)
+weight2.df["weightafter"]=weight2.df["beforeweight"]-weight2.df["weight_changes"]
+weight2.df
+t.test(weight2.df$beforeweight,weight2.df$weightafter,alternative="two.sided",paired=TRUE)
+```
+The p-value is as small as 0.006116 < 0.05, so it is significant that regimes have a significant difference at weight loss.
+
+
+## Question 2
+## Ch.5  problem 6
+```{r}
+no=c(1:16)
+x1=c(-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1)
+x2=c(-1,-1,1,1,-1,-1,1,1,-1,-1,1,1,-1,-1,1,1)
+x3=c(-1,-1,-1,-1,1,1,1,1,-1,-1,-1,-1,1,1,1,1)
+x12= x1*x2
+x13= x1*x3
+x23= x2*x3
+x123= x1*x2*x3
+y1=c(1,12,16,4,153,129,143,113,2,37,21,2,96,390,300,280)
+y2=c(1,15,10,6,170,148,170,217,4,39,21,5,67,369,377,250)
+y3=c(3,57,323,283,426,250,580,650,10,280,33,10,147,1470,665,675)
+y4=c(7,80,360,193,590,243,450,735,27,250,53,87,193,1560,810,795)
+bacteria=cbind.data.frame(no,x1,x2,x3,x12,x13,x23,x123,y1,y2,y3,y4)
+bacteria
+```
+#caculate the main and interaction effect
+```{r}
+#main effect
+x1y1=sum(x1*log(y1))/8
+x1y2=sum(x1*log(y2))/8
+x1y3=sum(x1*log(y3))/8
+x1y4=sum(x1*log(y4))/8
+x2y1=sum(x2*log(y1))/8
+x2y2=sum(x2*log(y2))/8
+x2y3=sum(x2*log(y3))/8
+x2y4=sum(x2*log(y4))/8
+x3y1=sum(x3*log(y1))/8
+x3y2=sum(x3*log(y2))/8
+x3y3=sum(x3*log(y3))/8
+x3y4=sum(x3*log(y4))/8
+
+matrix_main=matrix(c(x1y1,x1y2,x1y3,x1y4,
+                     x2y1,x2y2,x2y3,x2y4,
+                     x3y1,x3y2,x3y3,x3y4),nrow=4)
+
+#factor interaction effect
+x12y1=sum(x12*log(y1))/8
+x13y1=sum(x13*log(y1))/8
+          
+x23y1=sum(x23*log(y1))/8
+x123y1=sum(x123*log(y1))/8
+           
+x12y2=sum(x12*log(y2))/8
+x13y2=sum(x13*log(y2))/8
+x23y2=sum(x23*log(y2))/8
+x123y2=sum(x123*log(y2))/8
+           
+x12y3=sum(x12*log(y3))/8
+x13y3=sum(x13*log(y3))/8
+x23y3=sum(x23*log(y3))/8
+x123y3=sum(x123*log(y3))/8
+ 
+x12y4=sum(x12*log(y4))/8
+x13y4=sum(x13*log(y4))/8
+x23y4=sum(x23*log(y4))/8
+x123y4=sum(x123*log(y4))/8  
+           
+matrix_interaction= matrix(c(x12y1,x12y2,x12y3,x12y4,
+                     x13y1,x13y2,x13y3,x13y4,
+                     x23y1,x23y2,x23y3,x23y4,
+                     x123y1,x123y2,x123y3,x123y4),ncol=4)
+effect=cbind(matrix_main,matrix_interaction)
+effect=as.data.frame(effect)
+rownames(effect)=c("y1","y2","y3","y4")
+colnames(effect)=c("x1","x2","x3","x12","x13","x23","x123")
+effect
+
+
+```
+
+
+#ANova
+```{r}
+fit4=aov(log(y1)~x1+x2+x3+x12+x23+x13+x123, data = bacteria)
+summary(fit4)
+fit5=aov(log(y2)~x1+x2+x3+x12+x23+x13+x123, data = bacteria)
+summary(fit5)
+fit6=aov(log(y3)~x1+x2+x3+x12+x23+x13+x123, data = bacteria)
+summary(fit6)
+fit7=aov(log(y4)~x1+x2+x3+x12+x23+x13+x123, data = bacteria)
+summary(fit7)
+
+```
+is log transformation apporiate? can you find a better one?
+```{r}
+plot(fit7)
+```
+
+From the residual plots, it d looks like a good fit that the residuals looks like randomly scattered.
+
+
+
+## Ch.5  problem 10
+```{r}
+no=c(1:8)
+Temperature = c(50,60,50,60,50,60,50,60)
+
+Concentration = c(6,6,10,10,6,6,10,10)
+
+Stirring_Rate=c(60,60,60,60,100,100,100,100)
+
+
+Yield=c(54,57,69,70,55,54,80,81)
+chemical= cbind.data.frame(no,Temperature,Concentration,Stirring_Rate,Yield)
+chemical
+```
+Assumption:
+(1) interval data of the dependent variable, 
+(2) normality
+(3) homoscedasticity
+(4) no multicollinearity.  
+```{r}
+fit5=aov(Yield~Temperature*Concentration*Stirring_Rate,data=chemical)
+summary(fit5)
+aov2=aov(Yield~Temperature+Concentration+Stirring_Rate+Concentration:Stirring_Rate,data=chemical)
+summary(aov2)
+
+```
+Main conclusions:
+ 1.  Concentration and Stirring_Rate effects are significant, Yield increses at a higherConcentration and Stirring Rate.
+ 2. There are interaction effects between  Concentration and Stirring_Rate. 
+ 
+What settiings would I recommend?
+ High concetration level at 10%, and high stirring speed at 100 rpm.
+
+## Ch.6  problem 9
+```{r}
+no=c(12,1,2,6,15,8,7,4,11,14,3,16,13,10,5,9)
+A=c(-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1)
+B=c(-1,-1,1,1,-1,-1,1,1,-1,-1,1,1,-1,-1,1,1)
+C=c(-1,-1,-1,-1,1,1,1,1,-1,-1,-1,-1,1,1,1,1)
+D=c(-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1)
+E=c(1,-1,-1,1,-1,1,1,-1,-1,1,1,-1,1,-1,-1,1)
+AB=A*B
+AC=A*C
+ABC=A*B*C
+BC=B*C
+ABD=A*B*D
+y1=c(23.43,25.70,27.75,31.60,23.57,27.68,28.76,31.82,27.09,31.28,31.20,33.42,29.51,31.35,31.16,33.65)
+y2=c(141.61,161.13,136.54,128.52,145.55,123.75,121.93,120.37,95.24,78.31,74.34,91.76,65.23,78.65,79.76,72.80)
+y3=c(3318,4141,3790,4061,3431,3425,3507,3765,2580,2450,2319,3067,1925,2466,2485,2450)
+welding_study=cbind.data.frame(no,A,B,C,D,E,AB,AC,ABC,BC,ABD,y1,y2,y3)
+welding_study
+```
+# analyze experienmental results
+```{r}
+fit12<-aov(y1~(A+B+C+D+E)^5, welding_study)
+fit13<-aov(y2~(A+B+C+D+E)^5, welding_study)
+fit14<-aov(y3~(A+B+C+D+E)^5, welding_study)
+DanielPlot(fit12)
+DanielPlot(fit13)
+DanielPlot(fit14)
+```
+Only main effect D is significant for all y1,y2,y3.
+# Do you notice any relationships?
+```{r}
+plot(y2~y1,data=welding_study)
+plot(y3~y2,data=welding_study)
+```
+As y1 increase, y2 decrease.
+As y2 increase, y3 increase.
+So y1 and y2 are negatively related, y2 and y3 are positively related.
+```{r}
+fit10=aov(y1+y2+y3~A+B+C+D+E+AB+AC+ABC+BC+ABD,data = welding_study)
+summary(fit10)
+fit11=aov(y2+y3-y1~A+B+C+D+E+AB+AC+ABC+BC+ABD,data = welding_study)
+summary(fit11)
+
+
+```
+
+

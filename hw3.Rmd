@@ -1,0 +1,314 @@
+---
+title: "HW3"
+author: "Yuyu Fan"
+date: "10/29/2019"
+output:
+  pdf_document: default
+---
+
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Question 1
+## Ch.2  problem 4
+```{r}
+sample1975 <-c(17.74, 12.17, 12.22, 13.89, 16.47,
+               15.88, 16.10,16.74, 17.54, 17.43,
+               14.57, 12.90, 12.81, 14.95, 16.25,
+               17.13, 14.46, 14.20,16.90,11.34,
+               12.57, 13.15, 16.53, 13.60, 13.34,
+               13.67, 14.23, 15.81, 16.63, 11.40,
+               14.94,13.66, 9.79, 13.08, 14.57,
+               14.93, 14.01, 14.43, 16.35, 15.65,
+               11.52, 17.46, 14.67, 15.92, 16.02,
+               13.46, 13.70, 14.98, 14.57,15.72)
+hist(sample1975)
+mean(sample1975)
+sd(sample1975)
+
+sample1985 <-c(24.57, 24.79, 22.21, 25.84, 25.35,
+               22.19, 24.37, 21.32, 22.74, 23.38,
+               25.10, 28.03, 29.09, 29.34, 24.41,
+               25.12, 25.27, 27.46, 27.65, 27.95,
+               21.67, 22.15, 24.36, 26.32, 24.05,
+               28.27, 26.57, 26.10, 24.35, 30.04,
+               25.18, 27.42, 24.50, 23.21, 25.10,
+               23.59, 26.98, 22.64, 25.27, 25.84,
+               27.18, 24.69, 26.35, 23.05, 23.37,
+               25.46, 28.84, 22.14, 25.42, 21.76)
+hist(sample1985)
+mean(sample1985) ##there is an increase in the average values
+sd(sample1985)
+```
+## comment on interesting aspect
+## both the histogram plots appear to be normal distribution
+
+
+## a list of questions
+##  a) is there a siginificant difference of average between these two samples?
+##     H0: mean(sample1975) == mean(sample1985)
+##     alternative hypothesis: true difference in means is not equal to 0
+##      1. as we don't know the population variance
+##      2. and we have a fair large sample size that n1 and n2 both equal to 50
+##      so we will conduct t.test with significance level 0.05
+         
+```{r}
+ t.test(sample1975,sample1985)  
+```
+
+##     as we get a rather small p-value < 2.2e-16,
+##     that we are confident to reject the null hypothesis, and accepct the alternative hypothesis
+
+## b)  does the increase in the mean brought by the time changes?
+##     plenty of other factors may cause this change, and we will need more data and variables to make a better intepretation
+
+
+## Ch.2   problem 10
+# (a) #
+```{r}
+random_bolts_sample <-rnorm(397,mean=3.06,sd=0.03)
+mean(random_bolts_sample)
+sd(random_bolts_sample)
+n1 <- length(random_bolts_sample[random_bolts_sample<2.9])
+n2 <- length(random_bolts_sample[random_bolts_sample>3.1])
+n1
+n2
+```
+
+conlusion: so n1= 0 bolts are found too shoryt, and n2=34 bolts are found too long
+
+# (b) #
+assumptions: 50 bolts are drawn randomly and sample means follow a normal distribution
+```{r}
+n1=12
+n2=12
+p1=n1/50
+p2=n2/50
+z2=qnorm(p2,mean=0,sd=1) #caculate z-value under standard normal distribution
+z1=-z2
+z1
+z2
+sd= (3.1-3)/0.7063026
+```
+
+z1=-0.7063026= (2.9-mean)/sd
+z2= 0.7063026= (3.1-mean)/sd
+conlusion: mean= 3, sd= 0.1415824
+
+## Ch.2   problem 13
+## (a)
+```{r}
+##theoritical probability
+P1= 1/3
+P1
+n=6
+
+p0=pbinom(0,6,1/3)
+p1=pbinom(1,6,1/3)-pbinom(0,6,1/3)
+p2=pbinom(2,6,1/3)-pbinom(1,6,1/3)
+p3=pbinom(3,6,1/3)-pbinom(2,6,1/3)
+p4=pbinom(4,6,1/3)-pbinom(3,6,1/3)
+p5=pbinom(5,6,1/3)-pbinom(4,6,1/3)
+p6=pbinom(6,6,1/3)-pbinom(5,6,1/3)
+
+prob1 <-c(p0,p1,p2,p3,p4,p5,p6)
+prob1
+
+
+success_of_6 <-c(0,1,2,3,4,5,6)
+freq1<-prob1*64
+freq1
+
+##theoritical mean
+mean1=sum(t(success_of_6)*(freq1))/64
+mean1
+
+## theoritical variance
+var1= (sum(t(success_of_6)^2*(freq1))-64*(mean1^2))/63
+var1= n*P1*(1-P1)
+var1
+```
+
+##(b)
+```{r}
+success_of_6 <-c(0,1,2,3,4,5,6)
+freq2<-c(0,4,19,15,17,7,2)
+
+r1=rep(1,4)
+r2=rep(2,19)
+r3=rep(3,15)
+r4=rep(4,17)
+r5=rep(5,7)
+r6=rep(6,2)
+r=c(r1,r2,r3,r4,r5,r6)
+##empirical probability
+P2 = sum(r)/(64*6)
+P2
+
+##empirical mean and variance
+mean2=mean(r)
+mean2
+
+var2= var(r)
+var2
+```
+
+# (c) #
+```{r}
+## test the mean
+t.test(r,mu=2)
+```
+
+## p-value is as small as 2.942e-10, so we are confident to reject the null hypothesis
+##  the mean of the sample is not equal to 2
+
+```{r}
+## test the variance
+library(EnvStats)
+varTest(r,sigma.squared = var1)
+```
+
+## p-value is as large as 0.3942, so we don't have enough confidence to reject the null hypothesis
+## we are confident to say that the variance of the sample have its theoretical value
+
+
+# (d) # 
+## expected frequencies in the seven cells of the table 
+```{r}
+freq3 <- round(freq1)
+sum(freq3)
+freq3
+```
+
+## Question 2
+## Ch.3  problem 2
+```{r}
+data <-matrix(c(9,10,9,8,9,8,8,8,7,6,9,10,11,9,10,11,
+                         11,11,11,10,11,12,13,12,13,12,14,15,14,12,13,13,
+                         12,13,13,13,13,13,10,8,9,8,6,7,7,6,5,6,
+                         5,6,4,5,4,4,2,4,5,4,5,6,5,5,6,5,
+                         6,7,8,8,8,7,9,10,9,10,9,8,9,8,7,7,
+                         8,7,7,7,8,8,8,8,7,6,5,6,5,6,7,6,
+                         6,5,6,6,5,4,3,4,5,5,6,5,6,7,6,5)
+                        )
+
+n1<-0
+diff_sample= (3+4-8-6)/2
+diff_sample
+
+diff = rep(0,109)
+
+for (k in 1:109){
+  diff[k]=(data[k+2]+data[k+3]-data[k+1]-data[k])/2
+  if (diff[k] < (-3.5)) {
+  n1<-n1+1
+  }
+  
+}
+pvalue = n1/109
+pvalue
+
+
+```
+Conclusion:  reject null hypothesis.
+          p-value is as small as 0.009174312, only 1 out of the 109 differences are as great as -3.5. So we reject the null hypothesis and conclude that  S-142 works
+
+## Ch.3  Problem 4
+```{r}
+brandA <- c(2,4,2,1,9,9,2,2)
+brandB <- c(8,3,5,3,7,7,4)
+t.test(brandA,brandB)
+```
+
+Conclusion:  p- value is as large as 0.3316, t is smaller than 2.179, so we don't have enough confidence to rejecet the null hypothesis
+ there is no significant difference between these two beers
+ 
+## preferred assignment: assign both beers A and B to each judge to taste and rate
+## Purpose: Compare two brands of beers A and B 
+## Treatment: Beer A and B
+## Experiment units: 15 judges
+## Randomization: for the sequence to taste beer A or B, decided by flipping a coin
+## response: rate of beer's taste
+## conduct a paired test of the experiement response
+
+## perform a test based on a randomization distribution
+```{r}
+avg<-mean(brandB)-mean(brandA)
+n1<-0
+a=set.seed(4)
+y1<-c(2,4,2,1,9,9,2,2,8,3,5,3,7,7,4)
+h1<-NULL
+c1<-c(rep("A",8), rep("B",7))
+for (k in 1:10000){
+  c2<-sample(c1)
+  x1<-y1[c2=="A"]; x2<-y1[c2=="B"]
+  m1<-mean(x1); m2<-mean(x2)
+  d1<-m2-m1
+  h1<-c(h1,d1)
+  if (d1>=avg)n1<-n1+1
+}
+n1
+p1<-n1/10000 
+p1
+##plot the histogram of differences
+hist(h1)
+```
+Conclusion: since the p-value is as large as 0.1916, that we don't reject the null hypothesis based on the test
+
+## Ch.3  problem 8
+```{r}
+TubeA <-c(1.176,1.230,1.146, 1.672,0.954, 1.079, 1.204)
+TubeB <-c(1.279, 1.000, 1.146, 1.176, 0.699, 1.114, 1.114)
+## paired ttest
+t.test(TubeA,TubeB, paired=TRUE)
+```
+
+ since the p-value is 0.1409,and t = 1.6956 at 95% confidence level, we can't reject the null hypothesis
+ there is no significicant difference between plate current readings of cpmpartment A and B
+```{r}
+## perform a test based on a randomization distribution
+N<-0
+d<-TubeA-TubeB
+n<-length(d)
+dm<-mean(d)
+N<-10000
+D<-rep(0,N)
+for (i in 1:N){
+  C<-sample(c(-1,1),n, replace=TRUE)
+  D[i]<-mean(C*d)
+}
+a<-sum(abs(D)>=abs(dm))
+p<-a/N
+p
+##plot the histogram of differences
+hist(D)
+
+```
+ Conclusion: since the p-value is as large as 0.1849, that we don't reject the null hypothesis based on the test
+             there is no siginificant difference between plate current readings of cpmpartment A and B
+             
+
+## Question 3
+## Ch.3  problem 21
+```{r}
+NoTherapy = c(24,25,12)
+Group=c(10,13,20)
+Individual=c(41,32,9)
+recidivism= cbind(NoTherapy,Group,Individual)
+recidivism
+```
+
+assumption: a) samples are drawn randomly
+            b) oberavtions are mutually exclusive
+            c) errors are normally distributed
+H0:p1=p2=p3
+H1: at least one of the equations are not valid
+```{r}
+chisq.test(recidivism)
+```
+
+conclusion: Reject the null hypothesis
+   the p-value is small enough, so we are confident to reject the null hypothesis. 
+   The level of treatment will have an impact on recidivism.
+
+
